@@ -18,7 +18,7 @@ class MainWindow : public QMainWindow, public IStateDisplay
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(QString addr, int port, QWidget *parent = nullptr);
     ~MainWindow();
 
     void SetHwPosition(double x, double y, double z);

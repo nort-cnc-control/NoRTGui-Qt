@@ -9,7 +9,9 @@
 #include <QThread>
 #include <QHostAddress>
 
-MainWindow::MainWindow(QWidget *parent)
+#include <iostream>
+
+MainWindow::MainWindow(QString addr, int port, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
@@ -17,26 +19,21 @@ MainWindow::MainWindow(QWidget *parent)
     qApp->installEventFilter(this);
 
     QHostAddress ha;
-    ha.setAddress("10.55.1.110");
+    ha.setAddress(addr);
 
     sock = new QTcpSocket();
-    sock->connectToHost(ha, 8888);
+    sock->connectToHost(ha, port);
 
     if(!sock->waitForConnected(3000))
     {
         /*Err*/
-        auto err = sock->error();
+        //auto err = sock->error();
         auto errs = sock->errorString();
+        qCritical() << "can't connect: " + errs;
+        throw 0;
     }
     else
     {
-    }
-
-    auto state = sock->state();
-    if (state != QAbstractSocket::ConnectedState)
-    {
-        /* ERROR */
-        return;
     }
 
     rcv = new Receiver(this, sock);
