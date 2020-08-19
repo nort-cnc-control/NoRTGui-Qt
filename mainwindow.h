@@ -44,11 +44,15 @@ private slots:
     void on_start_clicked();
     void on_stop_clicked();
     void on_continue_btn_clicked();
+    void on_remoteConnect_clicked();
 private:
     Ui::MainWindow *ui;
     CommandLog log;
     Controller *ctl;
     QTcpSocket *sock;
     Receiver *rcv;
+    bool connected;
+
+    void rconnect(QString addr, int port);
 };
 #endif // MAINWINDOW_H

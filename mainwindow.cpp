@@ -18,23 +18,10 @@ MainWindow::MainWindow(QString addr, int port, QWidget *parent)
     ui->setupUi(this);
     qApp->installEventFilter(this);
 
-    QHostAddress ha;
-    ha.setAddress(addr);
+    ui->remoteAddr->setText(addr);
+    ui->remotePort->setText(QString::number(port));
 
-    sock = new QTcpSocket(this);
-    sock->connectToHost(ha, port);
-
-    if(!sock->waitForConnected(3000))
-    {
-        /*Err*/
-        //auto err = sock->error();
-        auto errs = sock->errorString();
-        qCritical() << "can't connect: " + errs;
-        throw 0;
-    }
-    else
-    {
-    }
+    rconnect(ui->remoteAddr->text(), ui->remotePort->text().toInt());
 
     rcv = new Receiver(this, sock);
     ctl = new Controller(sock);
@@ -224,4 +211,45 @@ void MainWindow::on_stop_clicked()
 void MainWindow::on_continue_btn_clicked()
 {
     ctl->Continue();
+}
+
+void MainWindow::on_remoteConnect_clicked()
+{
+    if (connected)
+    {
+        connected = false;
+        sock->disconnect();
+        ui->remoteConnect->setText("Connect");
+    }
+    else
+    {
+        rconnect(ui->remoteAddr->text(), ui->remotePort->text().toInt());
+    }
+}
+
+void MainWindow::rconnect(QString addr, int port)
+{
+    QHostAddress ha;
+    ha.setAddress(addr);
+
+    sock = new QTcpSocket(this);
+    sock->connectToHost(ha, port);
+
+    if(!sock->waitForConnected(3000))
+    {
+        /*Err*/
+        //auto err = sock->error();
+        auto errs = sock->errorString();
+        QMessageBox msg;
+        msg.setText("Can not connect to " + addr + ":" + QString::number(port));
+        msg.exec();
+        connected = false;
+        sock->disconnect();
+        ui->remoteConnect->setText("Connect");
+    }
+    else
+    {
+        ui->remoteConnect->setText("Disconnect");
+        connected = true;
+    }
 }
