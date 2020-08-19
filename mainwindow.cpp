@@ -21,6 +21,7 @@ MainWindow::MainWindow(QString addr, int port, QWidget *parent)
     ui->remoteAddr->setText(addr);
     ui->remotePort->setText(QString::number(port));
 
+    sock = new QTcpSocket(this);
     rconnect(ui->remoteAddr->text(), ui->remotePort->text().toInt());
 
     rcv = new Receiver(this, sock);
@@ -218,7 +219,7 @@ void MainWindow::on_remoteConnect_clicked()
     if (connected)
     {
         connected = false;
-        sock->disconnect();
+        sock->close();
         ui->remoteConnect->setText("Connect");
     }
     else
@@ -232,7 +233,6 @@ void MainWindow::rconnect(QString addr, int port)
     QHostAddress ha;
     ha.setAddress(addr);
 
-    sock = new QTcpSocket(this);
     sock->connectToHost(ha, port);
 
     if(!sock->waitForConnected(3000))
@@ -244,7 +244,7 @@ void MainWindow::rconnect(QString addr, int port)
         msg.setText("Can not connect to " + addr + ":" + QString::number(port));
         msg.exec();
         connected = false;
-        sock->disconnect();
+        sock->close();
         ui->remoteConnect->setText("Connect");
     }
     else
