@@ -21,7 +21,7 @@ MainWindow::MainWindow(QString addr, int port, QWidget *parent)
     QHostAddress ha;
     ha.setAddress(addr);
 
-    sock = new QTcpSocket();
+    sock = new QTcpSocket(this);
     sock->connectToHost(ha, port);
 
     if(!sock->waitForConnected(3000))

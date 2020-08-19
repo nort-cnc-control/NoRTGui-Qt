@@ -112,8 +112,10 @@ void Receiver::HandleState(QByteArray frame)
     }
 }
 
-void Receiver::read_data(int)
+void Receiver::read_data()
 {
+    int rcvd = sock->bytesAvailable();
+
     QByteArray data = sock->readAll();
     if (data.length() == 0)
         return;
@@ -156,7 +158,6 @@ Receiver::Receiver(IStateDisplay *dsp, QAbstractSocket *sock) : QObject()
 {
     this->dsp = dsp;
     this->sock = sock;
-    int desc = sock->socketDescriptor();
-    notifier = new QSocketNotifier(desc, QSocketNotifier::Type::Read);
-    QObject::connect(notifier, &QSocketNotifier::activated, this, &Receiver::read_data);
+
+    QObject::connect(sock, &QIODevice::readyRead, this, &Receiver::read_data);
 }

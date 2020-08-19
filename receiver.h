@@ -3,22 +3,19 @@
 
 #include "istatedisplay.h"
 #include <QAbstractSocket>
-#include <QSocketNotifier>
 #include <QObject>
 
 class Receiver : public QObject
 {
     Q_OBJECT
 private:
-    QSocketNotifier *notifier;
-
     QByteArray buffer;
     IStateDisplay *dsp;
     QAbstractSocket *sock;
     void HandleState(QByteArray frame);
 
 public slots:
-    void read_data(int socket);
+    void read_data();
 
 public:
     Receiver(IStateDisplay *dsp, QAbstractSocket *sock);
