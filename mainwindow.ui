@@ -448,7 +448,7 @@
      <item>
       <widget class="QLabel" name="current_line">
        <property name="text">
-        <string>0</string>
+        <string>N/A</string>
        </property>
       </widget>
      </item>

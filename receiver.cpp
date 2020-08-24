@@ -110,6 +110,18 @@ void Receiver::HandleState(QByteArray frame)
             dsp->DisplayMessage(message);
         }
     }
+    else if (type == "line")
+    {
+        /*
+         {
+            'type' : line,
+            'line' : 0
+         }
+        */
+
+        int line = doc["line"].toInt();
+        dsp->SetActiveLine(line);
+    }
 }
 
 void Receiver::read_data()

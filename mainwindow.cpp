@@ -58,10 +58,10 @@ void MainWindow::SetLocalPosition(double x, double y, double z, QString cs)
 
 void MainWindow::SetEndstops(bool x, bool y, bool z, bool probe)
 {
-    ui->es_x->setText(QString(x));
-    ui->es_y->setText(QString(y));
-    ui->es_z->setText(QString(z));
-    ui->es_probe->setText(QString(probe));
+    ui->es_x->setText(x ? "+" : "-");
+    ui->es_y->setText(y ? "+" : "-");
+    ui->es_z->setText(z ? "+" : "-");
+    ui->es_probe->setText(probe ? "+" : "-");
 }
 
 void MainWindow::SetMovement(double feed, QString command, bool is_moving)
@@ -80,7 +80,7 @@ void MainWindow::SetSpindleState(int speed, QString state)
 void MainWindow::SetActiveLine(int line)
 {
     if (line >= 0)
-        ui->current_line->setNum(line);
+        ui->current_line->setNum(line + 1); // nort uses lines numbering from 0, but text editors from 1
     else
         ui->current_line->setText("N/A");
 }
