@@ -27,6 +27,9 @@ MainWindow::MainWindow(QString addr, int port, QWidget *parent)
     rcv = new Receiver(this, sock);
     ctl = new Controller(sock);
     ctl->Reset();
+
+    SetActiveLine(-1);
+    ui->statusbar->show();
 }
 
 MainWindow::~MainWindow()
@@ -80,9 +83,9 @@ void MainWindow::SetSpindleState(int speed, QString state)
 void MainWindow::SetActiveLine(int line)
 {
     if (line >= 0)
-        ui->current_line->setNum(line + 1); // nort uses lines numbering from 0, but text editors from 1
+        ui->statusbar->showMessage("Current line: " + QString::number(line+1)); // nort uses lines numbering from 0, but text editors from 1
     else
-        ui->current_line->setText("N/A");
+        ui->statusbar->showMessage("Current line: N/A");
 }
 
 void MainWindow::SetStateIdle()
@@ -151,12 +154,17 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     return QObject::eventFilter(obj, event);
 }
 
-void MainWindow::on_new_file_clicked()
+void MainWindow::new_file()
 {
     ui->gcodeEditor->setPlainText("");
 }
 
-void MainWindow::on_open_file_clicked()
+void MainWindow::on_new_file_clicked()
+{
+    new_file();
+}
+
+void MainWindow::open_file()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
            tr("Open GCode"), "",
@@ -179,7 +187,12 @@ void MainWindow::on_open_file_clicked()
     ctl->LoadGCode(gcode);
 }
 
-void MainWindow::on_save_file_clicked()
+void MainWindow::on_open_file_clicked()
+{
+    open_file();
+}
+
+void MainWindow::save_file()
 {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save GCode"), "", tr("Gcode (*.gcode);;All Files (*)"));
     if (fileName.isEmpty())
@@ -196,6 +209,11 @@ void MainWindow::on_save_file_clicked()
     QTextStream out(&file);
     out.setCodec("UTF-8");
     out << gcode;
+}
+
+void MainWindow::on_save_file_clicked()
+{
+    save_file();
 }
 
 void MainWindow::on_start_clicked()

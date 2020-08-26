@@ -53,6 +53,9 @@ private:
     Receiver *rcv;
     bool connected;
 
+    void new_file();
+    void open_file();
+    void save_file();
     void rconnect(QString addr, int port);
 };
 #endif // MAINWINDOW_H
