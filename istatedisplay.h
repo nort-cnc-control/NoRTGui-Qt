@@ -21,7 +21,7 @@ public:
     virtual void SetStatePaused() = 0;
     virtual void SetStateRunning() = 0;
 
-    virtual void DisplayMessage(QString message) = 0;
+    virtual void DisplayMessage(QString header, QString message) = 0;
 };
 
 #endif // ISTATEDISPLAY_H

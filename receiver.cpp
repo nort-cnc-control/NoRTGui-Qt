@@ -107,7 +107,7 @@ void Receiver::HandleState(QByteArray frame)
 
         if (message.length() > 0)
         {
-            dsp->DisplayMessage(message);
+            dsp->DisplayMessage("state", message);
         }
     }
     else if (type == "line")
@@ -121,6 +121,12 @@ void Receiver::HandleState(QByteArray frame)
 
         int line = doc["line"].toInt();
         dsp->SetActiveLine(line);
+    }
+    else if (type == "message")
+    {
+        QString msg_type = doc["message_type"].toString();
+        QString msg = doc["message"].toString();
+        dsp->DisplayMessage(msg_type, msg);
     }
 }
 

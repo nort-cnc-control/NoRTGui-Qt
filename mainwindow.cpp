@@ -109,10 +109,11 @@ void MainWindow::SetStateRunning()
     ui->manual_command->setReadOnly(true);
 }
 
-void MainWindow::DisplayMessage(QString message)
+void MainWindow::DisplayMessage(QString header, QString message)
 {
     QMessageBox msgBox;
     msgBox.setText(message);
+    msgBox.setWindowTitle(header);
     msgBox.exec();
 }
 

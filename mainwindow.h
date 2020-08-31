@@ -33,7 +33,7 @@ public:
     void SetStatePaused();
     void SetStateRunning();
 
-    void DisplayMessage(QString message);
+    void DisplayMessage(QString header, QString message);
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
