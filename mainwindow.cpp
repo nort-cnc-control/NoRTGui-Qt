@@ -30,6 +30,7 @@ MainWindow::MainWindow(QString addr, int port, QWidget *parent)
 
     SetActiveLine(-1);
     ui->statusbar->show();
+    SetStateIdle();
 }
 
 MainWindow::~MainWindow()
@@ -240,6 +241,7 @@ void MainWindow::on_remoteConnect_clicked()
         connected = false;
         sock->close();
         ui->remoteConnect->setText("Connect");
+        SetStateIdle();
     }
     else
     {
