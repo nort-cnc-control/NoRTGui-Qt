@@ -52,6 +52,9 @@ private:
     QTcpSocket *sock;
     Receiver *rcv;
     bool connected;
+    bool gcode_changed;
+
+    void load_gcode();
 
     void new_file();
     void open_file();

@@ -15,6 +15,7 @@ MainWindow::MainWindow(QString addr, int port, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    gcode_changed = true;
     ui->setupUi(this);
     qApp->installEventFilter(this);
 
@@ -139,6 +140,8 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             QString cmd = ui->manual_command->text();
             if (cmd.length() > 0)
             {
+                if (gcode_changed)
+                    load_gcode();
                 log.AddNewLine(cmd);
                 log.CacheClear();
                 log.IndexReset();
@@ -152,6 +155,10 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         default:
             break;
         }
+    }
+    if (obj == ui->gcodeEditor && event->type() == QEvent::KeyPress)
+    {
+        gcode_changed = true;
     }
     return QObject::eventFilter(obj, event);
 }
@@ -186,7 +193,7 @@ void MainWindow::open_file()
     gcode = in.readAll();
 
     ui->gcodeEditor->setPlainText(gcode);
-    ctl->LoadGCode(gcode);
+    load_gcode();
 }
 
 void MainWindow::on_open_file_clicked()
@@ -220,7 +227,7 @@ void MainWindow::on_save_file_clicked()
 
 void MainWindow::on_start_clicked()
 {
-    ctl->LoadGCode(ui->gcodeEditor->toPlainText());
+    load_gcode();
     ctl->Start();
 }
 
@@ -247,6 +254,12 @@ void MainWindow::on_remoteConnect_clicked()
     {
         rconnect(ui->remoteAddr->text(), ui->remotePort->text().toInt());
     }
+}
+
+void MainWindow::load_gcode()
+{
+    ctl->LoadGCode(ui->gcodeEditor->toPlainText());
+    gcode_changed = false;
 }
 
 void MainWindow::rconnect(QString addr, int port)
