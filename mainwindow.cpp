@@ -140,15 +140,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             QString cmd = ui->manual_command->text();
             if (cmd.length() > 0)
             {
-                if (gcode_changed)
-                    load_gcode();
-                log.AddNewLine(cmd);
-                log.CacheClear();
-                log.IndexReset();
-                ui->manual_command->setText("");
-                ui->commandLog->setPlainText(log.GetLog());
-                ui->commandLog->verticalScrollBar()->setValue(ui->commandLog->verticalScrollBar()->maximum());
-                ctl->RunCommand(cmd);
+                run_command(cmd);
             }
             break;
         }
@@ -256,10 +248,33 @@ void MainWindow::on_remoteConnect_clicked()
     }
 }
 
+void MainWindow::on_homing_btn_clicked()
+{
+    run_command("G28");
+}
+
+void MainWindow::on_zprobe_btn_clicked()
+{
+    run_command("G30");
+}
+
 void MainWindow::load_gcode()
 {
     ctl->LoadGCode(ui->gcodeEditor->toPlainText());
     gcode_changed = false;
+}
+
+void MainWindow::run_command(QString cmd)
+{
+    if (gcode_changed)
+        load_gcode();
+    log.AddNewLine(cmd);
+    log.CacheClear();
+    log.IndexReset();
+    ui->manual_command->setText("");
+    ui->commandLog->setPlainText(log.GetLog());
+    ui->commandLog->verticalScrollBar()->setValue(ui->commandLog->verticalScrollBar()->maximum());
+    ctl->RunCommand(cmd);
 }
 
 void MainWindow::rconnect(QString addr, int port)

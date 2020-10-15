@@ -45,6 +45,8 @@ private slots:
     void on_stop_clicked();
     void on_continue_btn_clicked();
     void on_remoteConnect_clicked();
+    void on_homing_btn_clicked();
+    void on_zprobe_btn_clicked();
 private:
     Ui::MainWindow *ui;
     CommandLog log;
@@ -55,6 +57,7 @@ private:
     bool gcode_changed;
 
     void load_gcode();
+    void run_command(QString cmd);
 
     void new_file();
     void open_file();
