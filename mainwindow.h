@@ -26,12 +26,18 @@ public:
     void SetLocalPosition(double x, double y, double z, QString cs);
     void SetEndstops(bool x, bool y, bool z, bool probe);
     void SetMovement(double feed, QString command, bool is_moving);
-    void SetSpindleState(int speed, QString state);
     void SetActiveLine(int line);
 
     void SetStateIdle();
     void SetStatePaused();
     void SetStateRunning();
+
+    void ClearTools();
+    void AddNoneTool(int id, QString name, QString driver);
+    void AddBinaryTool(int id, QString name, QString driver);
+    void AddSpindleTool(int id, QString name, QString driver);
+    void SetBinaryState(int id, bool enabled);
+    void SetSpindleState(int id, bool enabled, QString dir, int speed);
 
     void DisplayMessage(QString header, QString message);
 protected:
@@ -63,5 +69,8 @@ private:
     void open_file();
     void save_file();
     void rconnect(QString addr, int port);
+
+    QMap<int, QWidget *> tool_widgets;
+    QLayout *tools_layout;
 };
 #endif // MAINWINDOW_H

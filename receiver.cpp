@@ -1,6 +1,7 @@
 #include "receiver.h"
 
 #include <QJsonDocument>
+#include <QJsonObject>
 #include <QThread>
 
 void Receiver::HandleState(QByteArray frame)
@@ -8,7 +9,60 @@ void Receiver::HandleState(QByteArray frame)
     QJsonDocument doc = QJsonDocument::fromJson(frame);
 
     QString type = doc["type"].toString();
-    if (type == "machine_state")
+    if (type == "machine_config")
+    {
+        QJsonObject tools = doc["tools"].toObject();
+        dsp->ClearTools();
+        for (QString key : tools.keys())
+        {
+            Tool toolDesc;
+            QJsonObject tool = tools[key].toObject();
+
+            QString type = tool["type"].toString();
+            QString name = tool["name"].toString();
+            QString driver = tool["driver"].toString();
+
+            toolDesc.name = name;
+            if (driver == "dummy")
+                toolDesc.driver = driver_dummy;
+            else if (driver == "n700e")
+                toolDesc.driver = driver_n700e;
+            else if (driver == "gpio")
+                toolDesc.driver = driver_gpio;
+            else if (driver == "modbus")
+                toolDesc.driver = driver_modbus;
+
+            if (type == "null")
+                toolDesc.type = type_none;
+            else if (type == "spindle")
+                toolDesc.type = type_spindle;
+            else if (type == "binary")
+                toolDesc.type = type_binary;
+
+            int id = key.toInt();
+            switch (toolDesc.type)
+            {
+                case type_none:
+                {
+                    dsp->AddNoneTool(id, toolDesc.name, driver);
+                    break;
+                }
+                case type_binary:
+                {
+                    dsp->AddBinaryTool(id, toolDesc.name, driver);
+                    break;
+                }
+                case type_spindle:
+                {
+                    dsp->AddSpindleTool(id, toolDesc.name, driver);
+                    break;
+                }
+            }
+
+            this->tools.insert(id, toolDesc);
+        }
+    }
+    else if (type == "machine_state")
     {
         /* HW State frame
             {
@@ -27,10 +81,15 @@ void Receiver::HandleState(QByteArray frame)
                     'feed': 6000,
                     'status': ''
                 },
-                'spindel': {
-                    'direction': '-',
-                    'speed': 0,
-                    'status': 'OFF'
+                'tools': {
+                    '1' : {
+                        'enabled' : true,
+                        'direction': 'CW',
+                        'speed': 440
+                    },
+                    '2' : {
+                        'enabled' : false
+                    }
                 },
                 'type': 'machine_state'
             }
@@ -61,11 +120,39 @@ void Receiver::HandleState(QByteArray frame)
         QString cmd = doc["movement"]["command"].toString();
         bool is_moving = false;
 
-        // spindle
-        int speed = doc["spindel"]["speed"].toDouble();
-        QString state = doc["spindel"]["direction"].toString();
-        if (doc["spindel"]["status"].toString() == "OFF")
-            state = "OFF";
+        // tools
+        QJsonValue toolsv = doc["tools"];
+        if (toolsv.isObject())
+        {
+            QJsonObject tools = toolsv.toObject();
+            for (auto ids : tools.keys())
+            {
+                int id = ids.toInt();
+                QJsonObject desc = tools[ids].toObject();
+                Tool tool = this->tools[id];
+                switch (tool.type)
+                {
+                case type_none:
+                    {
+                        break;
+                    }
+                case type_binary:
+                    {
+                        bool enabled = desc["enabled"].toBool();
+                        dsp->SetBinaryState(id, enabled);
+                        break;
+                    }
+                case type_spindle:
+                    {
+                        int speed = desc["speed"].toInt();
+                        bool enabled = desc["enabled"].toBool();
+                        QString dir = desc["direction"].toString();
+                        dsp->SetSpindleState(id, enabled, dir, speed);
+                        break;
+                    }
+                }
+            }
+        }
 
         dsp->SetHwPosition(hw_x, hw_y, hw_z);
         dsp->SetGlobalPosition(gl_x, gl_y, gl_z);
@@ -73,7 +160,6 @@ void Receiver::HandleState(QByteArray frame)
 
         dsp->SetEndstops(es_x, es_y, es_z, es_probe);
         dsp->SetMovement(feed, cmd, is_moving);
-        dsp->SetSpindleState(speed, state);
     }
     else if (type == "state")
     {

@@ -8,8 +8,122 @@
 #include <QTcpSocket>
 #include <QThread>
 #include <QHostAddress>
+#include <QFormLayout>
 
 #include <iostream>
+
+
+class DummyToolWidget : public QPushButton
+{
+    QLabel *idlabel;
+    QLabel *namelabel;
+
+public:
+    DummyToolWidget(int id, const QString &name, const QString &driver, QWidget *parent=nullptr):QPushButton(parent)
+    {
+        idlabel = new QLabel(QString::number(id), this);
+        namelabel = new QLabel(name, this);
+        QHBoxLayout *layout = new QHBoxLayout();
+        setLayout(layout);
+        setMinimumHeight(90);
+        setMinimumWidth(150);
+
+        layout->addWidget(idlabel);
+        layout->addWidget(namelabel);
+    }
+    ~DummyToolWidget()
+    {}
+};
+
+class BinaryToolWidget : public QPushButton
+{
+    QLabel *enlabel;
+    QLabel *idlabel;
+    QLabel *namelabel;
+public:
+    BinaryToolWidget(int id, const QString &name, const QString &driver, QWidget *parent=nullptr):QPushButton(parent)
+    {
+        enlabel = new QLabel("⬤", this);
+        idlabel = new QLabel(QString::number(id), this);
+        namelabel = new QLabel(name, this);
+        QHBoxLayout *layout = new QHBoxLayout();
+        setLayout(layout);
+        setMinimumHeight(90);
+        setMinimumWidth(150);
+        layout->addWidget(idlabel);
+        layout->addWidget(enlabel);
+        layout->addWidget(namelabel);
+        enlabel->setStyleSheet("QLabel { color : red; }");
+    }
+
+    ~BinaryToolWidget()
+    {
+    }
+
+    void setToolEnabled(bool enabled)
+    {
+        if (enabled)
+            enlabel->setStyleSheet("QLabel { color : lightgreen; }");
+        else
+            enlabel->setStyleSheet("QLabel { color : red; }");
+    }
+};
+
+class SpindleToolWidget : public QPushButton
+{
+    QLabel *idlabel;
+    QLabel *namelabel;
+    QLabel *spdlabel;
+    QLabel *enlabel;
+    QLabel *dirlabel;
+public:
+    SpindleToolWidget(int id, const QString &name, const QString &driver, QWidget *parent=nullptr):QPushButton(parent)
+    {
+        spdlabel = new QLabel(this);
+        enlabel = new QLabel("⬤", this);
+        dirlabel = new QLabel(this);
+        idlabel = new QLabel(QString::number(id), this);
+        namelabel = new QLabel(name, this);
+
+        enlabel->setStyleSheet("QLabel { color : red; }");
+
+        QHBoxLayout *layout = new QHBoxLayout();
+        setLayout(layout);
+        setMinimumHeight(90);
+        setMinimumWidth(190);
+
+        layout->addWidget(idlabel);
+        layout->addWidget(enlabel);
+        layout->addWidget(namelabel);
+        layout->addWidget(dirlabel);
+        layout->addWidget(spdlabel);
+
+
+        enlabel->setStyleSheet("QLabel { color : red; }");
+    }
+    ~SpindleToolWidget()
+    {
+    }
+
+    void setToolSpeed(int speed)
+    {
+        spdlabel->setNum(speed);
+    }
+
+    void setToolDirection(QString dir)
+    {
+        dirlabel->setText(dir);
+    }
+
+    void setToolEnabled(bool enabled)
+    {
+        if (enabled)
+            enlabel->setStyleSheet("QLabel { color : lightgreen; }");
+        else
+            enlabel->setStyleSheet("QLabel { color : red; }");
+    }
+};
+
 
 MainWindow::MainWindow(QString addr, int port, QWidget *parent)
     : QMainWindow(parent)
@@ -32,6 +146,9 @@ MainWindow::MainWindow(QString addr, int port, QWidget *parent)
     SetActiveLine(-1);
     ui->statusbar->show();
     SetStateIdle();
+
+    tools_layout = new QHBoxLayout();
+    ui->tools_bar->setLayout(tools_layout);
 }
 
 MainWindow::~MainWindow()
@@ -76,10 +193,61 @@ void MainWindow::SetMovement(double feed, QString command, bool is_moving)
     ui->is_moving->setText(QString(is_moving));
 }
 
-void MainWindow::SetSpindleState(int speed, QString state)
+void MainWindow::ClearTools()
 {
-    ui->speed->setNum(speed);
-    ui->running_state->setText(state);
+    for (auto id : tool_widgets.keys())
+    {
+        tools_layout->removeWidget(tool_widgets[id]);
+        delete tool_widgets[id];
+    }
+    tool_widgets.clear();
+}
+
+void MainWindow::AddNoneTool(int id, QString name, QString driver)
+{
+    QPushButton *tool = new DummyToolWidget(id, name, driver, this);
+    //tool->setMaximumSize(60, 60);
+    tool->setEnabled(false);
+    tool->setMinimumHeight(50);
+    tools_layout->addWidget(tool);
+    tools_layout->setAlignment(tool, Qt::AlignLeft);
+    tool_widgets.insert(id, tool);
+}
+
+void MainWindow::AddBinaryTool(int id, QString name, QString driver)
+{
+    BinaryToolWidget *tool = new BinaryToolWidget(id, name, driver, this);
+    //tool->setMaximumSize(60, 60);
+    //tool->setEnabled(false);
+    tool->setMinimumHeight(50);
+    tools_layout->addWidget(tool);
+    tools_layout->setAlignment(tool, Qt::AlignLeft);
+    tool_widgets.insert(id, tool);
+}
+
+void MainWindow::AddSpindleTool(int id, QString name, QString driver)
+{
+    SpindleToolWidget *tool = new SpindleToolWidget(id, name, driver, this);
+    //tool->setMaximumSize(60, 60);
+    //tool->setEnabled(false);
+    tool->setMinimumHeight(50);
+    tools_layout->addWidget(tool);
+    tools_layout->setAlignment(tool, Qt::AlignLeft);
+    tool_widgets.insert(id, tool);
+}
+
+void MainWindow::SetBinaryState(int id, bool enabled)
+{
+    auto widget = (BinaryToolWidget *)(tool_widgets[id]);
+    widget->setToolEnabled(enabled);
+}
+
+void MainWindow::SetSpindleState(int id, bool enabled, QString dir, int speed)
+{
+    auto widget = (SpindleToolWidget *)(tool_widgets[id]);
+    widget->setToolEnabled(enabled);
+    widget->setToolSpeed(speed);
+    widget->setToolDirection(dir);
 }
 
 void MainWindow::SetActiveLine(int line)
@@ -301,4 +469,5 @@ void MainWindow::rconnect(QString addr, int port)
         ui->remoteConnect->setText("Disconnect");
         connected = true;
     }
+    gcode_changed = true;
 }
