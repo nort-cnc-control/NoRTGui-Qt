@@ -6,6 +6,7 @@
 #include "istatedisplay.h"
 #include "receiver.h"
 
+#include <QJsonObject>
 #include <QMainWindow>
 #include <QTcpSocket>
 
@@ -18,7 +19,7 @@ class MainWindow : public QMainWindow, public IStateDisplay
     Q_OBJECT
 
 public:
-    MainWindow(QString addr, int port, QWidget *parent = nullptr);
+    MainWindow(QString addr, int port, QString configfile, QWidget *parent = nullptr);
     ~MainWindow();
 
     void SetHwPosition(double x, double y, double z);
@@ -72,5 +73,6 @@ private:
 
     QMap<int, QWidget *> tool_widgets;
     QLayout *tools_layout;
+    QJsonObject cfg;
 };
 #endif // MAINWINDOW_H

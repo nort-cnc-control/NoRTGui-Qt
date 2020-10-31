@@ -9,7 +9,7 @@
 #include <QThread>
 #include <QHostAddress>
 #include <QFormLayout>
-
+#include <QJsonObject>
 #include <iostream>
 
 
@@ -125,10 +125,19 @@ public:
 };
 
 
-MainWindow::MainWindow(QString addr, int port, QWidget *parent)
+MainWindow::MainWindow(QString addr, int port, QString configfile, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    QString val;
+    QFile file;
+    file.setFileName(configfile);
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    val = file.readAll();
+    file.close();
+    QJsonDocument cfgdoc = QJsonDocument::fromJson(val.toUtf8());
+    cfg = cfgdoc.object();
+
     gcode_changed = true;
     ui->setupUi(this);
     qApp->installEventFilter(this);
@@ -137,10 +146,11 @@ MainWindow::MainWindow(QString addr, int port, QWidget *parent)
     ui->remotePort->setText(QString::number(port));
 
     sock = new QTcpSocket(this);
-    rconnect(ui->remoteAddr->text(), ui->remotePort->text().toInt());
-
     rcv = new Receiver(this, sock);
     ctl = new Controller(sock);
+
+    rconnect(ui->remoteAddr->text(), ui->remotePort->text().toInt());
+
     ctl->Reset();
 
     SetActiveLine(-1);
@@ -468,6 +478,7 @@ void MainWindow::rconnect(QString addr, int port)
     {
         ui->remoteConnect->setText("Disconnect");
         connected = true;
+        ctl->Configure(cfg);
     }
     gcode_changed = true;
 }

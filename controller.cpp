@@ -133,3 +133,21 @@ void Controller::Reset()
     SendJson(doc);
 }
 
+void Controller::Configure(QJsonObject cfg)
+{
+    /*
+        {
+            "type" : "configuration",
+            "configuration" : {
+                ...
+            }
+        }
+    */
+
+    QJsonObject obj;
+    obj.insert("type", "configuration");
+    obj.insert("configuration", cfg);
+
+    QJsonDocument doc(obj);
+    SendJson(doc);
+}

@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
 
     QString addr = "127.0.0.1";
     int port = 8888;
+    QString configfile;
 
     QCommandLineParser parser;
     parser.setApplicationDescription("NoRT Gui");
@@ -27,12 +28,17 @@ int main(int argc, char *argv[])
     remotePort.setDefaultValue(QString::number(port));
     parser.addOption(remotePort);
 
+    QCommandLineOption config("c", QCoreApplication::translate("main", "NoRT Configuration"));
+    config.setValueName("config");
+    parser.addOption(config);
+
     parser.process(a);
 
     addr = parser.value(remoteAddr);
     port = parser.value(remotePort).toInt();
+    configfile = parser.value(config);
 
-    MainWindow w(addr, port);
+    MainWindow w(addr, port, configfile);
     w.show();
     return a.exec();
 }

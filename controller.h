@@ -19,6 +19,7 @@ public:
     void Stop();
     void Continue();
     void Reset();
+    void Configure(QJsonObject doc);
 };
 
 #endif // CONTROLLER_H
