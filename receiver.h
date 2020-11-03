@@ -2,30 +2,10 @@
 #define RECEIVER_H
 
 #include "istatedisplay.h"
+#include "tools.h"
 #include <QAbstractSocket>
 #include <QObject>
 
-enum ToolDriver
-{
-    driver_dummy = 0,
-    driver_n700e,
-    driver_modbus,
-    driver_gpio,
-};
-
-enum ToolType
-{
-    type_none = 0,
-    type_binary,
-    type_spindle,
-};
-
-struct Tool
-{
-    QString name;
-    ToolType type;
-    ToolDriver driver;
-};
 
 class Receiver : public QObject
 {

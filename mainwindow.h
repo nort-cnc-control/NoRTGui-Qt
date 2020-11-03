@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "commandlog.h"
+#include "configuration.h"
 #include "controller.h"
 #include "istatedisplay.h"
 #include "receiver.h"
@@ -54,6 +55,8 @@ private slots:
     void on_remoteConnect_clicked();
     void on_homing_btn_clicked();
     void on_zprobe_btn_clicked();
+    void on_configure_clicked();
+    void configure_finished(int result);
 private:
     Ui::MainWindow *ui;
     CommandLog log;
@@ -70,9 +73,16 @@ private:
     void open_file();
     void save_file();
     void rconnect(QString addr, int port);
+    void createConfigurationDir(QString configdir);
+
+    QList<QPair<QString, QString>> profiles;
+    QString currentProfile;
+    QString currentProfileName;
 
     QMap<int, QWidget *> tool_widgets;
     QLayout *tools_layout;
-    QJsonObject cfg;
+
+    QString configdir;
+    Configuration *optionsDialog;
 };
 #endif // MAINWINDOW_H

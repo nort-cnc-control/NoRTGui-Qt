@@ -1,3 +1,4 @@
+#include "configuration.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -11,6 +12,7 @@
 #include <QFormLayout>
 #include <QJsonObject>
 #include <iostream>
+#include <QJsonArray>
 
 
 class DummyToolWidget : public QPushButton
@@ -125,18 +127,77 @@ public:
 };
 
 
-MainWindow::MainWindow(QString addr, int port, QString configfile, QWidget *parent)
+void MainWindow::createConfigurationDir(QString configdir)
+{
+    if (!QDir().mkdir(configdir))
+    {
+        //ERROR
+        return;
+    }
+    QFile cfgfile(QDir(configdir).filePath("nort.json"));
+    if (!cfgfile.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        // ERROR
+        return;
+    }
+    QJsonObject cfg;
+    QJsonArray profiles;
+    cfg.insert("default", "Default");
+    profiles.append("Default");
+    cfg.insert("profiles", profiles);
+    cfgfile.write(QJsonDocument(cfg).toJson());
+    cfgfile.close();
+
+    QFile prffile(QDir(configdir).filePath("Default.json"));
+    if (!prffile.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        // ERROR
+        return;
+    }
+    QJsonObject defconfig;
+    prffile.write(QJsonDocument(defconfig).toJson());
+    prffile.close();
+}
+
+
+MainWindow::MainWindow(QString addr, int port, QString configdir, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     QString val;
-    QFile file;
-    file.setFileName(configfile);
-    file.open(QIODevice::ReadOnly | QIODevice::Text);
-    val = file.readAll();
-    file.close();
-    QJsonDocument cfgdoc = QJsonDocument::fromJson(val.toUtf8());
-    cfg = cfgdoc.object();
+    this->configdir = configdir;
+    if (!QDir(configdir).exists())
+        createConfigurationDir(configdir);
+
+    // Read nort.json
+    QFile configfile(QDir(configdir).filePath("nort.json"));
+    if (!configfile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        // ERROR
+        return;
+    }
+    QJsonDocument config = QJsonDocument::fromJson(configfile.readAll());
+    configfile.close();
+
+    currentProfileName = config["default"].toString();
+
+    // Read profiles
+    auto cfgprofiles = config["profiles"].toArray();
+    for (int i = 0; i < cfgprofiles.count(); ++i)
+    {
+        auto name = cfgprofiles[i].toString();
+        auto filename = QDir(configdir).filePath(name + ".json");
+        QFile file(filename);
+        file.open(QIODevice::ReadOnly | QIODevice::Text);
+        auto profile = file.readAll();
+        file.close();
+        QPair<QString, QString> pair(name, profile);
+        profiles.append(pair);
+        if (name == currentProfileName)
+            currentProfile = profile;
+    }
+
+
 
     gcode_changed = true;
     ui->setupUi(this);
@@ -159,6 +220,8 @@ MainWindow::MainWindow(QString addr, int port, QString configfile, QWidget *pare
 
     tools_layout = new QHBoxLayout();
     ui->tools_bar->setLayout(tools_layout);
+
+    optionsDialog = nullptr;
 }
 
 MainWindow::~MainWindow()
@@ -436,6 +499,62 @@ void MainWindow::on_zprobe_btn_clicked()
     run_command("G30");
 }
 
+void MainWindow::on_configure_clicked()
+{
+    optionsDialog = new Configuration(profiles, currentProfileName, this);
+    connect(optionsDialog, SIGNAL(finished(int)), this, SLOT(configure_finished(int)));
+    optionsDialog->setModal(true);
+    optionsDialog->show();
+}
+
+void MainWindow::configure_finished(int result)
+{
+    if (optionsDialog == nullptr)
+        return;
+    if (result == 0)
+    {
+        auto prf = optionsDialog->profile();
+        if (prf.first != nullptr)
+        {
+            currentProfile = prf.second;
+            currentProfileName = prf.first;
+        }
+        profiles = optionsDialog->profiles;
+
+        // Save nort.json
+        QJsonObject currentConfiguration;
+        currentConfiguration.insert("default", currentProfileName);
+        QJsonArray prfs;
+        for (int i = 0; i < profiles.count(); ++i)
+            prfs.append(profiles[i].first);
+        currentConfiguration.insert("profiles", prfs);
+
+        QFile cfgfile(QDir(configdir).filePath("nort.json"));
+        if (!cfgfile.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            // ERROR
+        }
+        cfgfile.write(QJsonDocument(currentConfiguration).toJson());
+        cfgfile.close();
+
+        // Save profiles
+        for (int i = 0; i < profiles.count(); ++i)
+        {
+            QFile prffile(QDir(configdir).filePath(profiles[i].first) + ".json");
+            if (!prffile.open(QIODevice::WriteOnly | QIODevice::Text))
+            {
+                // ERROR
+                return;
+            }
+            prffile.write(profiles[i].second.toUtf8());
+            prffile.close();
+        }
+    }
+    disconnect(optionsDialog, SIGNAL(finished(int)), this, SLOT(configure_finished(int)));
+    delete optionsDialog;
+    optionsDialog = nullptr;
+}
+
 void MainWindow::load_gcode()
 {
     ctl->LoadGCode(ui->gcodeEditor->toPlainText());
@@ -478,7 +597,9 @@ void MainWindow::rconnect(QString addr, int port)
     {
         ui->remoteConnect->setText("Disconnect");
         connected = true;
-        ctl->Configure(cfg);
+        // Load current profile
+        QJsonObject machineConfiguration = QJsonDocument::fromJson(currentProfile.toUtf8()).object();
+        ctl->Configure(machineConfiguration);
     }
     gcode_changed = true;
 }

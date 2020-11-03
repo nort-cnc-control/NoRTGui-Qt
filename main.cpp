@@ -2,6 +2,8 @@
 
 #include <QApplication>
 #include <QCommandLineParser>
+#include <QDir>
+#include <QStandardPaths>
 
 int main(int argc, char *argv[])
 {
@@ -11,7 +13,8 @@ int main(int argc, char *argv[])
 
     QString addr = "127.0.0.1";
     int port = 8888;
-    QString configfile;
+    QString configdir;
+
 
     QCommandLineParser parser;
     parser.setApplicationDescription("NoRT Gui");
@@ -28,17 +31,20 @@ int main(int argc, char *argv[])
     remotePort.setDefaultValue(QString::number(port));
     parser.addOption(remotePort);
 
-    QCommandLineOption config("c", QCoreApplication::translate("main", "NoRT Configuration"));
+    QCommandLineOption config("c", QCoreApplication::translate("main", "NoRT config dir"));
     config.setValueName("config");
+    QString cfgdir = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
+    QDir cfg(cfgdir);
+    config.setDefaultValue(cfg.filePath("NoRT"));
     parser.addOption(config);
 
     parser.process(a);
 
     addr = parser.value(remoteAddr);
     port = parser.value(remotePort).toInt();
-    configfile = parser.value(config);
+    configdir = parser.value(config);
 
-    MainWindow w(addr, port, configfile);
+    MainWindow w(addr, port, configdir);
     w.show();
     return a.exec();
 }

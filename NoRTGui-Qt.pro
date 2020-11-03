@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     commandlog.cpp \
+    configuration.cpp \
     controller.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -24,12 +25,15 @@ SOURCES += \
 
 HEADERS += \
     commandlog.h \
+    configuration.h \
     controller.h \
     istatedisplay.h \
     mainwindow.h \
-    receiver.h
+    receiver.h \
+    tools.h
 
 FORMS += \
+    configuration.ui \
     mainwindow.ui
 
 TRANSLATIONS += \
