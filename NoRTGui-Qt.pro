@@ -1,4 +1,4 @@
-QT       += core gui network
+QT       += core gui network gamepad
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -19,6 +19,7 @@ SOURCES += \
     commandlog.cpp \
     configuration.cpp \
     controller.cpp \
+    gamepadmovecontroller.cpp \
     main.cpp \
     mainwindow.cpp \
     receiver.cpp
@@ -27,6 +28,7 @@ HEADERS += \
     commandlog.h \
     configuration.h \
     controller.h \
+    gamepadmovecontroller.h \
     istatedisplay.h \
     mainwindow.h \
     receiver.h \

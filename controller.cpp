@@ -151,3 +151,41 @@ void Controller::Configure(QJsonObject cfg)
     QJsonDocument doc(obj);
     SendJson(doc);
 }
+
+void Controller::StartManualMovement()
+{
+    QJsonObject obj;
+
+    obj.insert("type", "mode_selection");
+    obj.insert("mode", "manual");
+
+    QJsonDocument doc(obj);
+    SendJson(doc);
+}
+
+void Controller::StopManualMovement()
+{
+    QJsonObject obj;
+    obj.insert("type", "mode_selection");
+    obj.insert("mode", "gcode");
+
+    QJsonDocument doc(obj);
+    SendJson(doc);
+}
+
+void Controller::ManualMovementFeed(double fx, double fy, double fz)
+{
+    QJsonObject obj;
+    obj.insert("type", "command");
+    obj.insert("command", "manual_feed");
+
+    QJsonObject feeds;
+    feeds.insert("x", fx);
+    feeds.insert("y", fy);
+    feeds.insert("z", fz);
+
+    obj.insert("feed", feeds);
+
+    QJsonDocument doc(obj);
+    SendJson(doc);
+}

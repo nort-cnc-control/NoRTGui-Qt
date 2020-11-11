@@ -6,10 +6,12 @@
 #include "controller.h"
 #include "istatedisplay.h"
 #include "receiver.h"
+#include "gamepadmovecontroller.h"
 
 #include <QJsonObject>
 #include <QMainWindow>
 #include <QTcpSocket>
+#include <QGamepad>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -57,6 +59,12 @@ private slots:
     void on_zprobe_btn_clicked();
     void on_configure_clicked();
     void configure_finished(int result);
+    void gamepadLeftXChanged(double x);
+    void gamepadLeftYChanged(double y);
+    void gamepadRightYChanged(double y);
+    void gp_movement_started();
+    void gp_movement_finished();
+    void gp_movement_changed(double fx, double fy, double fz);
 private:
     Ui::MainWindow *ui;
     CommandLog log;
@@ -65,6 +73,8 @@ private:
     Receiver *rcv;
     bool connected;
     bool gcode_changed;
+    bool gcode_running;
+    bool movement_running;
 
     void load_gcode();
     void run_command(QString cmd);
@@ -75,6 +85,8 @@ private:
     void rconnect(QString addr, int port);
     void createConfigurationDir(QString configdir);
 
+    void use_gamepad(int id);
+
     QList<QPair<QString, QString>> profiles;
     QString currentProfile;
     QString currentProfileName;
@@ -84,5 +96,11 @@ private:
 
     QString configdir;
     Configuration *optionsDialog;
+
+    QGamepadManager *gamepad_manager;
+    int gamepad_id;
+    QGamepad *gamepad;
+
+    GamepadMoveController *gpmc;
 };
 #endif // MAINWINDOW_H

@@ -13,6 +13,7 @@
 #include <QJsonObject>
 #include <iostream>
 #include <QJsonArray>
+#include <QGamepad>
 
 
 class DummyToolWidget : public QPushButton
@@ -220,6 +221,83 @@ MainWindow::MainWindow(QString addr, int port, QString configdir, QWidget *paren
     ui->tools_bar->setLayout(tools_layout);
 
     optionsDialog = nullptr;
+
+    gpmc = new GamepadMoveController(10, 100, 800, this);
+    bool success;
+    success = connect(gpmc, SIGNAL(movement_start()), this, SLOT(gp_movement_started()));
+    Q_ASSERT(success);
+    success = connect(gpmc, SIGNAL(movement_finish()), this, SLOT(gp_movement_finished()));
+    Q_ASSERT(success);
+    success = connect(gpmc, SIGNAL(movement_change(double, double, double)), this, SLOT(gp_movement_changed(double, double, double)));
+    Q_ASSERT(success);
+    gamepad = nullptr;
+    gamepad_manager = QGamepadManager::instance();
+    auto gamepads = gamepad_manager->connectedGamepads();
+    for (int i = 0; i < gamepads.count(); i++)
+    {
+        int id = gamepads[i];
+        QString name = gamepad_manager->gamepadName(id);
+        bool connected = gamepad_manager->isGamepadConnected(id);
+        if (connected)
+        {
+            use_gamepad(id);
+            break;
+        }
+    }
+}
+
+void MainWindow::use_gamepad(int id)
+{
+    if (gamepad != nullptr)
+    {
+        disconnect(gamepad, SIGNAL(axisLeftXChanged(double)), this, SLOT(gamepadLeftXChanged(double)));
+        disconnect(gamepad, SIGNAL(axisLeftYChanged(double)), this, SLOT(gamepadLeftYChanged(double)));
+    }
+
+    gamepad_id = id;
+    gamepad = new QGamepad(id, this);
+
+    Q_ASSERT(connect(gamepad, SIGNAL(axisLeftXChanged(double)), this, SLOT(gamepadLeftXChanged(double))));
+    Q_ASSERT(connect(gamepad, SIGNAL(axisLeftYChanged(double)), this, SLOT(gamepadLeftYChanged(double))));
+    Q_ASSERT(connect(gamepad, SIGNAL(axisRightYChanged(double)), this, SLOT(gamepadRightYChanged(double))));
+}
+
+void MainWindow::gamepadLeftXChanged(double x)
+{
+    gpmc->set_position_x(x);
+}
+
+void MainWindow::gamepadLeftYChanged(double y)
+{
+    gpmc->set_position_y(y);
+}
+
+void MainWindow::gamepadRightYChanged(double y)
+{
+    gpmc->set_position_z(y);
+}
+
+void MainWindow::gp_movement_started()
+{
+    if (!gcode_running)
+    {
+        movement_running = true;
+        ctl->StartManualMovement();
+    }
+}
+
+void MainWindow::gp_movement_finished()
+{
+    movement_running = false;
+    ctl->StopManualMovement();
+}
+
+void MainWindow::gp_movement_changed(double fx, double fy, double fz)
+{
+    if (!gcode_running)
+    {
+        ctl->ManualMovementFeed(fx, fy, fz);
+    }
 }
 
 MainWindow::~MainWindow()
@@ -331,6 +409,7 @@ void MainWindow::SetActiveLine(int line)
 
 void MainWindow::SetStateIdle()
 {
+    gcode_running = false;
     ui->start->setEnabled(true);
     ui->continue_btn->setEnabled(false);
     ui->manual_command->setReadOnly(false);
@@ -338,6 +417,7 @@ void MainWindow::SetStateIdle()
 
 void MainWindow::SetStatePaused()
 {
+    gcode_running = false;
     ui->start->setEnabled(false);
     ui->continue_btn->setEnabled(true);
     ui->manual_command->setReadOnly(false);
@@ -345,6 +425,7 @@ void MainWindow::SetStatePaused()
 
 void MainWindow::SetStateRunning()
 {
+    gcode_running = true;
     ui->start->setEnabled(false);
     ui->continue_btn->setEnabled(false);
     ui->manual_command->setReadOnly(true);
@@ -553,6 +634,7 @@ void MainWindow::configure_finished(int result)
     optionsDialog = nullptr;
     ui->profile_name->setText("Profile: " + currentProfileName);
 }
+
 
 void MainWindow::load_gcode()
 {
