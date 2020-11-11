@@ -61,7 +61,9 @@ private slots:
     void configure_finished(int result);
     void gamepadLeftXChanged(double x);
     void gamepadLeftYChanged(double y);
-    void gamepadRightYChanged(double y);
+    void gamepadButtonUpChanged(bool value);
+    void gamepadButtonDownChanged(bool value);
+
     void gp_movement_started();
     void gp_movement_finished();
     void gp_movement_changed(double fx, double fy, double fz);

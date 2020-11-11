@@ -259,7 +259,8 @@ void MainWindow::use_gamepad(int id)
 
     Q_ASSERT(connect(gamepad, SIGNAL(axisLeftXChanged(double)), this, SLOT(gamepadLeftXChanged(double))));
     Q_ASSERT(connect(gamepad, SIGNAL(axisLeftYChanged(double)), this, SLOT(gamepadLeftYChanged(double))));
-    Q_ASSERT(connect(gamepad, SIGNAL(axisRightYChanged(double)), this, SLOT(gamepadRightYChanged(double))));
+    Q_ASSERT(connect(gamepad, SIGNAL(buttonUpChanged(bool)), this, SLOT(gamepadButtonUpChanged(bool))));
+    Q_ASSERT(connect(gamepad, SIGNAL(buttonDownChanged(bool)), this, SLOT(gamepadButtonDownChanged(bool))));
 }
 
 void MainWindow::gamepadLeftXChanged(double x)
@@ -272,10 +273,36 @@ void MainWindow::gamepadLeftYChanged(double y)
     gpmc->set_position_y(y);
 }
 
-void MainWindow::gamepadRightYChanged(double y)
+void MainWindow::gamepadButtonUpChanged(bool value)
 {
-    gpmc->set_position_z(y);
+    if (value)
+    {
+        gpmc->set_position_z(1);
+    }
+    if (!value)
+    {
+        if (gamepad->buttonDown())
+            gpmc->set_position_z(-1);
+        else
+            gpmc->set_position_z(0);
+    }
 }
+
+void MainWindow::gamepadButtonDownChanged(bool value)
+{
+    if (value)
+    {
+        gpmc->set_position_z(-1);
+    }
+    if (!value)
+    {
+        if (gamepad->buttonUp())
+            gpmc->set_position_z(1);
+        else
+            gpmc->set_position_z(0);
+    }
+}
+
 
 void MainWindow::gp_movement_started()
 {
