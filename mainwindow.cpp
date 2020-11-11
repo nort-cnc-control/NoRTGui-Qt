@@ -159,7 +159,6 @@ void MainWindow::createConfigurationDir(QString configdir)
     prffile.close();
 }
 
-
 MainWindow::MainWindow(QString addr, int port, QString configdir, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -197,12 +196,11 @@ MainWindow::MainWindow(QString addr, int port, QString configdir, QWidget *paren
             currentProfile = profile;
     }
 
-
-
     gcode_changed = true;
     ui->setupUi(this);
     qApp->installEventFilter(this);
 
+    ui->profile_name->setText("Profile: " + currentProfileName);
     ui->remoteAddr->setText(addr);
     ui->remotePort->setText(QString::number(port));
 
@@ -553,6 +551,7 @@ void MainWindow::configure_finished(int result)
     disconnect(optionsDialog, SIGNAL(finished(int)), this, SLOT(configure_finished(int)));
     delete optionsDialog;
     optionsDialog = nullptr;
+    ui->profile_name->setText("Profile: " + currentProfileName);
 }
 
 void MainWindow::load_gcode()

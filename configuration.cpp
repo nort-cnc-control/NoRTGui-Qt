@@ -24,6 +24,9 @@ Configuration::Configuration(QList<QPair<QString, QString>> profiles, QString pr
     ui->profiles->setCurrentIndex(currentProfile);
     ui->config->setPlainText(profiles[currentProfile].second);
     ui->profile_name->setText(profilename);
+
+    if (profiles.count() < 2)
+        ui->remove_profile->setEnabled(false);
 }
 
 Configuration::~Configuration()
@@ -33,7 +36,19 @@ Configuration::~Configuration()
 
 void Configuration::on_remove_profile_clicked()
 {
+    if (profiles.count() < 2)
+        return;
 
+    profiles.removeAt(currentProfile);
+    ui->profiles->removeItem(currentProfile);
+
+    currentProfile = 0;
+    ui->profiles->setCurrentIndex(currentProfile);
+    ui->config->setPlainText(profiles[currentProfile].second);
+    ui->profile_name->setText(profiles[currentProfile].first);
+
+    if (profiles.count() < 2)
+        ui->remove_profile->setEnabled(false);
 }
 
 void Configuration::on_config_textChanged()
@@ -58,6 +73,9 @@ void Configuration::on_profiles_activated(int index)
         profiles.insert(nump, newp);
         ui->profiles->insertItem(nump, newp.first);
         ui->profiles->setCurrentIndex(index);
+
+        if (profiles.count() > 1)
+            ui->remove_profile->setEnabled(true);
     }
 
     // Select profile
