@@ -252,8 +252,15 @@ void MainWindow::use_gamepad(int id)
     {
         disconnect(gamepad, SIGNAL(axisLeftXChanged(double)), this, SLOT(gamepadLeftXChanged(double)));
         disconnect(gamepad, SIGNAL(axisLeftYChanged(double)), this, SLOT(gamepadLeftYChanged(double)));
+        disconnect(gamepad, SIGNAL(buttonUpChanged(bool)), this, SLOT(gamepadButtonUpChanged(bool)));
+        disconnect(gamepad, SIGNAL(buttonDownChanged(bool)), this, SLOT(gamepadButtonDownChanged(bool)));
+        disconnect(gamepad, &QGamepad::buttonL1Changed, this, &MainWindow::gamepadButtonLeftUp);
+        disconnect(gamepad, &QGamepad::buttonL3Changed, this, &MainWindow::gamepadButtonLeftDown);
     }
 
+    QString cfg = QDir(configdir).filePath("gamepad.cfg");
+    gamepad_manager->setSettingsFile(cfg);
+    gamepad_manager->resetConfiguration(id);
     gamepad_id = id;
     gamepad = new QGamepad(id, this);
 
@@ -261,6 +268,8 @@ void MainWindow::use_gamepad(int id)
     Q_ASSERT(connect(gamepad, SIGNAL(axisLeftYChanged(double)), this, SLOT(gamepadLeftYChanged(double))));
     Q_ASSERT(connect(gamepad, SIGNAL(buttonUpChanged(bool)), this, SLOT(gamepadButtonUpChanged(bool))));
     Q_ASSERT(connect(gamepad, SIGNAL(buttonDownChanged(bool)), this, SLOT(gamepadButtonDownChanged(bool))));
+    Q_ASSERT(connect(gamepad, &QGamepad::buttonL1Changed, this, &MainWindow::gamepadButtonLeftUp));
+    Q_ASSERT(connect(gamepad, &QGamepad::buttonL3Changed, this, &MainWindow::gamepadButtonLeftDown));
 }
 
 void MainWindow::gamepadLeftXChanged(double x)
@@ -303,6 +312,21 @@ void MainWindow::gamepadButtonDownChanged(bool value)
     }
 }
 
+void MainWindow::gamepadButtonLeftUp(bool value)
+{
+    Q_UNUSED(value);
+    bool fast = gamepad->buttonL1();
+    bool slow = gamepad->buttonL3();
+    gpmc->select_speed(fast, slow);
+}
+
+void MainWindow::gamepadButtonLeftDown(bool value)
+{
+    Q_UNUSED(value);
+    bool fast = gamepad->buttonL1();
+    bool slow = gamepad->buttonL3();
+    gpmc->select_speed(fast, slow);
+}
 
 void MainWindow::gp_movement_started()
 {

@@ -64,6 +64,9 @@ private slots:
     void gamepadButtonUpChanged(bool value);
     void gamepadButtonDownChanged(bool value);
 
+    void gamepadButtonLeftUp(bool value);
+    void gamepadButtonLeftDown(bool value);
+
     void gp_movement_started();
     void gp_movement_finished();
     void gp_movement_changed(double fx, double fy, double fz);
