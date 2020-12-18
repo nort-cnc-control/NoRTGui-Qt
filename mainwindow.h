@@ -70,6 +70,9 @@ private slots:
     void gp_movement_started();
     void gp_movement_finished();
     void gp_movement_changed(double fx, double fy, double fz);
+
+    void gamepad_connected(int deviceId);
+    void gamepad_disconnected(int deviceId);
 private:
     Ui::MainWindow *ui;
     CommandLog log;
@@ -91,6 +94,7 @@ private:
     void createConfigurationDir(QString configdir);
 
     void use_gamepad(int id);
+    void use_first_gamepad();
 
     QList<QPair<QString, QString>> profiles;
     QString currentProfile;

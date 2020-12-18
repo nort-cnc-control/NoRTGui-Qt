@@ -24,6 +24,7 @@ class DummyToolWidget : public QPushButton
 public:
     DummyToolWidget(int id, const QString &name, const QString &driver, QWidget *parent=nullptr):QPushButton(parent)
     {
+        Q_UNUSED(driver);
         idlabel = new QLabel(QString::number(id), this);
         namelabel = new QLabel(name, this);
         QHBoxLayout *layout = new QHBoxLayout();
@@ -46,6 +47,7 @@ class BinaryToolWidget : public QPushButton
 public:
     BinaryToolWidget(int id, const QString &name, const QString &driver, QWidget *parent=nullptr):QPushButton(parent)
     {
+        Q_UNUSED(driver);
         enlabel = new QLabel("⬤", this);
         idlabel = new QLabel(QString::number(id), this);
         namelabel = new QLabel(name, this);
@@ -82,6 +84,7 @@ class SpindleToolWidget : public QPushButton
 public:
     SpindleToolWidget(int id, const QString &name, const QString &driver, QWidget *parent=nullptr):QPushButton(parent)
     {
+        Q_UNUSED(driver);
         spdlabel = new QLabel(this);
         enlabel = new QLabel("⬤", this);
         dirlabel = new QLabel(this);
@@ -160,6 +163,7 @@ void MainWindow::createConfigurationDir(QString configdir)
     prffile.close();
 }
 
+
 MainWindow::MainWindow(QString addr, int port, QString configdir, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -223,51 +227,77 @@ MainWindow::MainWindow(QString addr, int port, QString configdir, QWidget *paren
     optionsDialog = nullptr;
 
     gpmc = new GamepadMoveController(10, 100, 800, this);
-    bool success;
-    success = connect(gpmc, SIGNAL(movement_start()), this, SLOT(gp_movement_started()));
-    Q_ASSERT(success);
-    success = connect(gpmc, SIGNAL(movement_finish()), this, SLOT(gp_movement_finished()));
-    Q_ASSERT(success);
-    success = connect(gpmc, SIGNAL(movement_change(double, double, double)), this, SLOT(gp_movement_changed(double, double, double)));
-    Q_ASSERT(success);
+
+    Q_ASSERT(connect(gpmc, &GamepadMoveController::movement_start, this, &MainWindow::gp_movement_started));
+    Q_ASSERT(connect(gpmc, &GamepadMoveController::movement_finish, this, &MainWindow::gp_movement_finished));
+    Q_ASSERT(connect(gpmc, &GamepadMoveController::movement_change, this, &MainWindow::gp_movement_changed));
+
     gamepad = nullptr;
     gamepad_manager = QGamepadManager::instance();
+
+    use_first_gamepad();
+
+    Q_ASSERT(connect(gamepad_manager, &QGamepadManager::gamepadConnected, this, &MainWindow::gamepad_connected));
+    Q_ASSERT(connect(gamepad_manager, &QGamepadManager::gamepadDisconnected, this, &MainWindow::gamepad_disconnected));
+}
+
+void MainWindow::gamepad_connected(int deviceId)
+{
+    use_gamepad(deviceId);
+}
+
+void MainWindow::gamepad_disconnected(int deviceId)
+{
+    Q_UNUSED(deviceId);
+    use_first_gamepad();
+}
+
+void MainWindow::use_first_gamepad()
+{
     auto gamepads = gamepad_manager->connectedGamepads();
-    for (int i = 0; i < gamepads.count(); i++)
+    if (gamepads.count() == 0)
     {
-        int id = gamepads[i];
-        QString name = gamepad_manager->gamepadName(id);
-        bool connected = gamepad_manager->isGamepadConnected(id);
-        if (connected)
-        {
-            use_gamepad(id);
-            break;
-        }
+        use_gamepad(-1);
     }
+    else
+    {
+        use_gamepad(gamepads[0]);
+    }
+
 }
 
 void MainWindow::use_gamepad(int id)
 {
     if (gamepad != nullptr)
     {
-        disconnect(gamepad, SIGNAL(axisLeftXChanged(double)), this, SLOT(gamepadLeftXChanged(double)));
-        disconnect(gamepad, SIGNAL(axisLeftYChanged(double)), this, SLOT(gamepadLeftYChanged(double)));
-        disconnect(gamepad, SIGNAL(buttonUpChanged(bool)), this, SLOT(gamepadButtonUpChanged(bool)));
-        disconnect(gamepad, SIGNAL(buttonDownChanged(bool)), this, SLOT(gamepadButtonDownChanged(bool)));
+        disconnect(gamepad, &QGamepad::axisLeftXChanged, this, &MainWindow::gamepadLeftXChanged);
+        disconnect(gamepad, &QGamepad::axisLeftYChanged, this, &MainWindow::gamepadLeftYChanged);
+        disconnect(gamepad, &QGamepad::buttonUpChanged, this, &MainWindow::gamepadButtonUpChanged);
+        disconnect(gamepad, &QGamepad::buttonDownChanged, this, &MainWindow::gamepadButtonDownChanged);
         disconnect(gamepad, &QGamepad::buttonL1Changed, this, &MainWindow::gamepadButtonLeftUp);
         disconnect(gamepad, &QGamepad::buttonL3Changed, this, &MainWindow::gamepadButtonLeftDown);
+        delete gamepad;
+        gamepad = nullptr;
     }
 
+    if (id < 0)
+        return;
+
+    QString name = gamepad_manager->gamepadName(id);
+    if (!gamepad_manager->isGamepadConnected(id))
+        return;
+
+    qDebug() << "Use gamepad: " << name;
     QString cfg = QDir(configdir).filePath("gamepad.cfg");
     gamepad_manager->setSettingsFile(cfg);
     gamepad_manager->resetConfiguration(id);
     gamepad_id = id;
     gamepad = new QGamepad(id, this);
 
-    Q_ASSERT(connect(gamepad, SIGNAL(axisLeftXChanged(double)), this, SLOT(gamepadLeftXChanged(double))));
-    Q_ASSERT(connect(gamepad, SIGNAL(axisLeftYChanged(double)), this, SLOT(gamepadLeftYChanged(double))));
-    Q_ASSERT(connect(gamepad, SIGNAL(buttonUpChanged(bool)), this, SLOT(gamepadButtonUpChanged(bool))));
-    Q_ASSERT(connect(gamepad, SIGNAL(buttonDownChanged(bool)), this, SLOT(gamepadButtonDownChanged(bool))));
+    Q_ASSERT(connect(gamepad, &QGamepad::axisLeftXChanged, this, &MainWindow::gamepadLeftXChanged));
+    Q_ASSERT(connect(gamepad, &QGamepad::axisLeftYChanged, this, &MainWindow::gamepadLeftYChanged));
+    Q_ASSERT(connect(gamepad, &QGamepad::buttonUpChanged, this, &MainWindow::gamepadButtonUpChanged));
+    Q_ASSERT(connect(gamepad, &QGamepad::buttonDownChanged, this, &MainWindow::gamepadButtonDownChanged));
     Q_ASSERT(connect(gamepad, &QGamepad::buttonL1Changed, this, &MainWindow::gamepadButtonLeftUp));
     Q_ASSERT(connect(gamepad, &QGamepad::buttonL3Changed, this, &MainWindow::gamepadButtonLeftDown));
 }
@@ -284,6 +314,7 @@ void MainWindow::gamepadLeftYChanged(double y)
 
 void MainWindow::gamepadButtonUpChanged(bool value)
 {
+    qDebug() << "gamepad Up changed" << value;
     if (value)
     {
         gpmc->set_position_z(1);
@@ -350,6 +381,7 @@ void MainWindow::gp_movement_changed(double fx, double fy, double fz)
         ctl->ManualMovementFeed(fx, fy, fz);
     }
 }
+
 
 MainWindow::~MainWindow()
 {
