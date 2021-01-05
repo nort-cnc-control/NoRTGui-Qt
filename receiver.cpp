@@ -109,6 +109,10 @@ void Receiver::HandleState(QByteArray frame)
         double loc_z = doc["coordinates"]["local"][2].toDouble();
         QString loc_cs = doc["coordinates"]["cs"].toString();
 
+        double loc_state_x = doc["state"]["local"][0].toDouble();
+        double loc_state_y = doc["state"]["local"][1].toDouble();
+        double loc_state_z = doc["state"]["local"][2].toDouble();
+
         // endstops
         bool es_x = doc["endstops"]["axes"][0].toBool();
         bool es_y = doc["endstops"]["axes"][1].toBool();
@@ -157,6 +161,7 @@ void Receiver::HandleState(QByteArray frame)
         dsp->SetHwPosition(hw_x, hw_y, hw_z);
         dsp->SetGlobalPosition(gl_x, gl_y, gl_z);
         dsp->SetLocalPosition(loc_x, loc_y, loc_z, loc_cs);
+        dsp->SetLocalStatePosition(loc_state_x, loc_state_y, loc_state_z);
 
         dsp->SetEndstops(es_x, es_y, es_z, es_probe);
         dsp->SetMovement(feed, cmd, is_moving);

@@ -28,6 +28,8 @@ public:
     void SetHwPosition(double x, double y, double z);
     void SetGlobalPosition(double x, double y, double z);
     void SetLocalPosition(double x, double y, double z, QString cs);
+    void SetLocalStatePosition(double x, double y, double z);
+
     void SetEndstops(bool x, bool y, bool z, bool probe);
     void SetMovement(double feed, QString command, bool is_moving);
     void SetActiveLine(int line);

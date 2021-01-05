@@ -410,6 +410,13 @@ void MainWindow::SetLocalPosition(double x, double y, double z, QString cs)
     ui->loc_cs->setText(cs);
 }
 
+void MainWindow::SetLocalStatePosition(double x, double y, double z)
+{
+    ui->loc_state_x->setNum(x);
+    ui->loc_state_y->setNum(y);
+    ui->loc_state_z->setNum(z);
+}
+
 void MainWindow::SetEndstops(bool x, bool y, bool z, bool probe)
 {
     ui->es_x->setText(x ? "+" : "-");

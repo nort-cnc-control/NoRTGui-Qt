@@ -197,33 +197,51 @@
              <property name="sizeConstraint">
               <enum>QLayout::SetDefaultConstraint</enum>
              </property>
-             <item row="0" column="2">
-              <widget class="QLabel" name="label_7">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                 <horstretch>1</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
+             <item row="2" column="3">
+              <widget class="QLabel" name="loc_y">
                <property name="font">
                 <font>
                  <family>Monospace</family>
                 </font>
                </property>
                <property name="text">
-                <string>Global</string>
+                <string>0</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_5">
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_13">
                <property name="font">
                 <font>
                  <family>Monospace</family>
                 </font>
                </property>
                <property name="text">
-                <string>Y</string>
+                <string>Z</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLabel" name="hw_y">
+               <property name="font">
+                <font>
+                 <family>Monospace</family>
+                </font>
+               </property>
+               <property name="text">
+                <string>0</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QLabel" name="gl_z">
+               <property name="font">
+                <font>
+                 <family>Monospace</family>
+                </font>
+               </property>
+               <property name="text">
+                <string>0</string>
                </property>
               </widget>
              </item>
@@ -239,15 +257,27 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="3">
-              <widget class="QLabel" name="loc_y">
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_3">
                <property name="font">
                 <font>
                  <family>Monospace</family>
                 </font>
                </property>
                <property name="text">
-                <string>0</string>
+                <string>X</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="font">
+                <font>
+                 <family>Monospace</family>
+                </font>
+               </property>
+               <property name="text">
+                <string>Y</string>
                </property>
               </widget>
              </item>
@@ -293,39 +323,21 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="2">
-              <widget class="QLabel" name="gl_y">
+             <item row="0" column="2">
+              <widget class="QLabel" name="label_7">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                 <horstretch>1</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="font">
                 <font>
                  <family>Monospace</family>
                 </font>
                </property>
                <property name="text">
-                <string>0</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_3">
-               <property name="font">
-                <font>
-                 <family>Monospace</family>
-                </font>
-               </property>
-               <property name="text">
-                <string>X</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLabel" name="hw_y">
-               <property name="font">
-                <font>
-                 <family>Monospace</family>
-                </font>
-               </property>
-               <property name="text">
-                <string>0</string>
+                <string>Global</string>
                </property>
               </widget>
              </item>
@@ -347,18 +359,6 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_13">
-               <property name="font">
-                <font>
-                 <family>Monospace</family>
-                </font>
-               </property>
-               <property name="text">
-                <string>Z</string>
-               </property>
-              </widget>
-             </item>
              <item row="3" column="1">
               <widget class="QLabel" name="hw_z">
                <property name="font">
@@ -371,8 +371,8 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="2">
-              <widget class="QLabel" name="gl_z">
+             <item row="2" column="2">
+              <widget class="QLabel" name="gl_y">
                <property name="font">
                 <font>
                  <family>Monospace</family>
@@ -441,6 +441,34 @@
                  </widget>
                 </item>
                </layout>
+              </widget>
+             </item>
+             <item row="2" column="4">
+              <widget class="QLabel" name="loc_state_y">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="4">
+              <widget class="QLabel" name="loc_state_z">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="4">
+              <widget class="QLabel" name="loc_state_x">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="4">
+              <widget class="QLabel" name="label_11">
+               <property name="text">
+                <string>Local State</string>
+               </property>
               </widget>
              </item>
             </layout>
@@ -784,7 +812,7 @@
      <x>0</x>
      <y>0</y>
      <width>1148</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
   </widget>

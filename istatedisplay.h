@@ -12,6 +12,8 @@ public:
     virtual void SetHwPosition(double x, double y, double z) = 0;
     virtual void SetGlobalPosition(double x, double y, double z) = 0;
     virtual void SetLocalPosition(double x, double y, double z, QString cs) = 0;
+    virtual void SetLocalStatePosition(double x, double y, double z) = 0;
+
     virtual void SetEndstops(bool x, bool y, bool z, bool probe) = 0;
     virtual void SetMovement(double feed, QString command, bool is_moving) = 0;
     virtual void SetActiveLine(int line) = 0;
