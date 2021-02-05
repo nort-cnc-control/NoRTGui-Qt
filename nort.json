@@ -1,0 +1,7 @@
+{
+    "default": "Emulator",
+    "profiles": [
+        "Emulator",
+        "Prusa I3"
+    ]
+}
