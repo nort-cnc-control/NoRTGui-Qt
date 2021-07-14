@@ -19,6 +19,8 @@ public:
     void Stop();
     void Continue();
     void Reset();
+    void EnableSteppers();
+    void DisableSteppers();
     void Configure(QJsonObject doc);
     void StartManualMovement();
     void StopManualMovement();

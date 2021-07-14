@@ -643,6 +643,16 @@ void MainWindow::on_continue_btn_clicked()
     ctl->Continue();
 }
 
+void MainWindow::on_en_steppers_clicked()
+{
+    ctl->EnableSteppers();
+}
+
+void MainWindow::on_dis_steppers_clicked()
+{
+    ctl->DisableSteppers();
+}
+
 void MainWindow::on_remoteConnect_clicked()
 {
     if (connected)

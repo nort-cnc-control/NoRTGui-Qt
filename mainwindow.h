@@ -60,6 +60,9 @@ private slots:
     void on_homing_btn_clicked();
     void on_zprobe_btn_clicked();
     void on_configure_clicked();
+    void on_en_steppers_clicked();
+    void on_dis_steppers_clicked();
+
     void configure_finished(int result);
     void gamepadLeftXChanged(double x);
     void gamepadLeftYChanged(double y);

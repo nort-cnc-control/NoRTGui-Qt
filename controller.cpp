@@ -133,6 +133,38 @@ void Controller::Reset()
     SendJson(doc);
 }
 
+void Controller::EnableSteppers()
+{
+    /*
+        {
+           "type" : "command",
+           "command" : "enable_steppers"
+        }
+    */
+    QJsonObject obj;
+    obj.insert("type", "command");
+    obj.insert("command", "enable_steppers");
+
+    QJsonDocument doc(obj);
+    SendJson(doc);
+}
+
+void Controller::DisableSteppers()
+{
+    /*
+        {
+           "type" : "command",
+           "command" : "disable_steppers"
+        }
+    */
+    QJsonObject obj;
+    obj.insert("type", "command");
+    obj.insert("command", "disable_steppers");
+
+    QJsonDocument doc(obj);
+    SendJson(doc);
+}
+
 void Controller::Configure(QJsonObject cfg)
 {
     /*
