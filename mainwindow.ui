@@ -22,32 +22,18 @@
       </property>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item alignment="Qt::AlignLeft">
-         <widget class="QPushButton" name="new_file">
-          <property name="text">
-           <string>NEW</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignLeft">
-         <widget class="QPushButton" name="open_file">
-          <property name="text">
-           <string>OPEN</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignLeft">
-         <widget class="QPushButton" name="save_file">
-          <property name="text">
-           <string>SAVE</string>
-          </property>
-         </widget>
-        </item>
         <item>
-         <widget class="QPushButton" name="configure">
-          <property name="text">
-           <string>Configure</string>
-          </property>
+         <widget class="QComboBox" name="sourceFormat">
+          <item>
+           <property name="text">
+            <string>GCode</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Excellon</string>
+           </property>
+          </item>
          </widget>
         </item>
         <item>
@@ -842,6 +828,32 @@
      <height>22</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionNewFile"/>
+    <addaction name="actionOpenFile"/>
+    <addaction name="actionSaveFile"/>
+    <addaction name="actionSaveAsFile"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <addaction name="actionConfigure"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuOptions"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionNew">
@@ -857,6 +869,56 @@
   <action name="actionSave">
    <property name="text">
     <string>Save</string>
+   </property>
+  </action>
+  <action name="actionNewFile">
+   <property name="text">
+    <string>New</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionOpenFile">
+   <property name="text">
+    <string>Open</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSaveFile">
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionConfigure">
+   <property name="text">
+    <string>Configure</string>
+   </property>
+  </action>
+  <action name="actionSaveAsFile">
+   <property name="text">
+    <string>Save As</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
    </property>
   </action>
  </widget>

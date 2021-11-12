@@ -50,18 +50,24 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
 private slots:
-    void on_new_file_clicked();
-    void on_open_file_clicked();
-    void on_save_file_clicked();
     void on_start_clicked();
     void on_stop_clicked();
     void on_continue_btn_clicked();
     void on_remoteConnect_clicked();
     void on_homing_btn_clicked();
     void on_zprobe_btn_clicked();
-    void on_configure_clicked();
     void on_en_steppers_clicked();
     void on_dis_steppers_clicked();
+
+    void on_actionNewFile_triggered();
+    void on_actionOpenFile_triggered();
+    void on_actionSaveFile_triggered();
+    void on_actionSaveAsFile_triggered();
+    void on_actionConfigure_triggered();
+    void on_actionQuit_triggered();
+    void on_actionAbout_triggered();
+
+    void on_sourceFormat_currentTextChanged(const QString &text);
 
     void configure_finished(int result);
     void gamepadLeftXChanged(double x);
@@ -89,14 +95,18 @@ private:
     bool gcode_running;
     bool movement_running;
 
+    QString filename;
+
     void load_gcode();
     void run_command(QString cmd);
 
     void new_file();
     void open_file();
-    void save_file();
+    void save_file(bool select_name);
     void rconnect(QString addr, int port);
     void createConfigurationDir(QString configdir);
+
+    void select_format();
 
     void use_gamepad(int id);
     void use_first_gamepad();

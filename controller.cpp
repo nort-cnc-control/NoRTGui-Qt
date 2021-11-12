@@ -20,6 +20,11 @@ Controller::Controller(QAbstractSocket *sock)
     this->sock = sock;
 }
 
+void Controller::SetSourceFormat(QString format)
+{
+    this->format = format;
+}
+
 void Controller::RunCommand(QString cmd)
 {
     /*
@@ -45,6 +50,7 @@ void Controller::LoadGCode(QString gcode)
         {
             "type": "command",
             "command": "load",
+            "format" : ("gcode" | "excellon")
             "program": [...]
         }
      */
@@ -53,6 +59,7 @@ void Controller::LoadGCode(QString gcode)
     QJsonObject obj;
     obj.insert("type", "command");
     obj.insert("command", "load");
+    obj.insert("format", format);
 
     QJsonArray ls;
     for (auto line : lines)

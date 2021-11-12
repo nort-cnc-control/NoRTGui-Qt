@@ -565,14 +565,50 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     return QObject::eventFilter(obj, event);
 }
 
+void MainWindow::on_actionNewFile_triggered()
+{
+
+    new_file();
+}
+
+void MainWindow::on_actionOpenFile_triggered()
+{
+    open_file();
+}
+
+void MainWindow::on_actionSaveFile_triggered()
+{
+    save_file(false);
+}
+
+void MainWindow::on_actionSaveAsFile_triggered()
+{
+    save_file(true);
+}
+
+void MainWindow::on_actionConfigure_triggered()
+{
+    optionsDialog = new Configuration(profiles, currentProfileName, this);
+    connect(optionsDialog, SIGNAL(finished(int)), this, SLOT(configure_finished(int)));
+    optionsDialog->setModal(true);
+    optionsDialog->show();
+}
+
+void MainWindow::on_actionQuit_triggered()
+{
+    this->close();
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QMessageBox::about(this, "About", "NoRT CNC Control.\nhttps://github.com/nort-cnc-control");
+}
+
 void MainWindow::new_file()
 {
     ui->gcodeEditor->setPlainText("");
-}
-
-void MainWindow::on_new_file_clicked()
-{
-    new_file();
+    filename = "";
+    this->setWindowTitle("NoRT CNC");
 }
 
 void MainWindow::open_file()
@@ -585,6 +621,7 @@ void MainWindow::open_file()
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly| QFile::Text))
     {
+        this->setWindowTitle("NoRT CNC");
         QMessageBox::information(this, tr("Unable to open file"), file.errorString());
         return;
     }
@@ -596,18 +633,24 @@ void MainWindow::open_file()
 
     ui->gcodeEditor->setPlainText(gcode);
     load_gcode();
+
+    filename = fileName;
+    this->setWindowTitle("NoRT CNC: " + filename);
 }
 
-void MainWindow::on_open_file_clicked()
+void MainWindow::save_file(bool select_name)
 {
-    open_file();
-}
-
-void MainWindow::save_file()
-{
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save GCode"), "", tr("Gcode (*.gcode);;All Files (*)"));
-    if (fileName.isEmpty())
-        return;
+    QString fileName;
+    if (select_name || filename == "")
+    {
+        fileName = QFileDialog::getSaveFileName(this, tr("Save GCode"), "", tr("Gcode (*.gcode);;All Files (*)"));
+        if (fileName.isEmpty())
+            return;
+    }
+    else
+    {
+        fileName = filename;
+    }
 
     QFile file(fileName);
     if (!file.open(QFile::WriteOnly| QFile::Text))
@@ -615,16 +658,15 @@ void MainWindow::save_file()
         QMessageBox::information(this, tr("Unable to save file"), file.errorString());
         return;
     }
+
     QString gcode = ui->gcodeEditor->toPlainText();
 
     QTextStream out(&file);
     out.setCodec("UTF-8");
     out << gcode;
-}
 
-void MainWindow::on_save_file_clicked()
-{
-    save_file();
+    filename = fileName;
+    this->setWindowTitle("NoRT CNC: " + filename);
 }
 
 void MainWindow::on_start_clicked()
@@ -678,14 +720,6 @@ void MainWindow::on_zprobe_btn_clicked()
     run_command("G30");
 }
 
-void MainWindow::on_configure_clicked()
-{
-    optionsDialog = new Configuration(profiles, currentProfileName, this);
-    connect(optionsDialog, SIGNAL(finished(int)), this, SLOT(configure_finished(int)));
-    optionsDialog->setModal(true);
-    optionsDialog->show();
-}
-
 void MainWindow::configure_finished(int result)
 {
     if (optionsDialog == nullptr)
@@ -735,9 +769,26 @@ void MainWindow::configure_finished(int result)
     ui->profile_name->setText("Profile: " + currentProfileName);
 }
 
+void MainWindow::select_format()
+{
+    QString format = "gcode";
+    QString fmt = ui->sourceFormat->currentText();
+    if (fmt == "GCode")
+        format = "gcode";
+    else if (fmt == "Excellon")
+        format = "excellon";
+
+    ctl->SetSourceFormat(format);
+}
+
+void MainWindow::on_sourceFormat_currentTextChanged(const QString &text)
+{
+    select_format();
+}
 
 void MainWindow::load_gcode()
 {
+    select_format();
     ctl->LoadGCode(ui->gcodeEditor->toPlainText());
     gcode_changed = false;
 }

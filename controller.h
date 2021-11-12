@@ -9,9 +9,11 @@
 class Controller
 {
 private:
+    QString format;
     QAbstractSocket *sock;
     void SendJson(QJsonDocument doc);
 public:
+    void SetSourceFormat(QString format);
     Controller(QAbstractSocket *sock);
     void RunCommand(QString cmd);
     void LoadGCode(QString gcode);
